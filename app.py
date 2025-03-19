@@ -216,10 +216,14 @@ db = SQLDatabase(engine=engine)
 
 #Create tools
 from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain_community.utilities.tavily_search import TavilySearchAPIWrapper
 
 TAVILY_API_KEY="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"
+tavilySearchAPIWrapper = TavilySearchAPIWrapper(tavily_api_key=TAVILY_API_KEY)
 
-tavily_tool = TavilySearchResults(api_wrapper=TAVILY_API_KEY, description="Use for information about NYC Local Law 33/18 and denfitions related to Building Energy Scores in NYC.")
+tavily_tool = TavilySearchResults(api_wrapper=tavilySearchAPIWrapper, 
+                                  description="Use for information about NYC Local Law 33/18 and denfitions related to Building Energy Scores in NYC.", 
+                                  max_results=3)
 
 tools = [tavily_tool]
 

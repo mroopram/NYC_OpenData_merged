@@ -1,5 +1,5 @@
 import pandas as pd
-from dash import Dash, dcc, html, Input, Output, clientside_callback
+from dash import Dash, dcc, html, Input, Output, clientside_callback, callback, State, no_update
 import plotly.express as px
 import dash_bootstrap_components as dbc
 import json
@@ -70,7 +70,24 @@ accordion = dbc.Accordion(
             title="Your Building ...",
             className="mt-1 ms-2 me-2",
         ),
-    ],
+        #Chat Bot
+        dbc.AccordionItem(
+            [
+        dbc.Row([
+            dbc.Col([html.Div('Ask our LLM questions about the Energy Star Guide')], width=8),
+        ]),
+        dbc.Row([
+            dbc.Col([dcc.Textarea(id='user-question', style={'width':400})], width=8),
+            dbc.Col([html.Button('Submit', id='submit-btn')], width=8),
+        ]),
+        dbc.Row([
+            dbc.Col([dcc.Markdown(id='response-div')], width=8),
+        ]),     
+            ],
+            title="Q&A Bot ...",
+            className="mt-1 ms-2 me-2",
+        ),
+    ], 
 )
 tab1_content = dbc.Container(
     [
@@ -189,6 +206,46 @@ app.layout = dbc.Container(
 #     Output("switch", "id"),
 #     Input("switch", "value"),
 # )
+
+#connect to sql database
+from sqlalchemy import create_engine
+from langchain_community.utilities import SQLDatabase
+
+engine = create_engine('sqlite:///opendata_github_database.db', echo=False)
+db = SQLDatabase(engine=engine)
+
+#Create tools
+from langchain_community.tools.tavily_search import TavilySearchResults
+
+TAVILY_API_KEY="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"
+
+tavily_tool = TavilySearchResults(api_wrapper=TAVILY_API_KEY, description="Use for information about NYC Local Law 33/18 and denfitions related to Building Energy Scores in NYC.")
+
+tools = [tavily_tool]
+
+#Create Agent
+from langchain_openai import ChatOpenAI
+from langchain_community.agent_toolkits import create_sql_agent
+
+OPENAI_API_KEY="sk-None-EOUOIa7NX36gbj8F0X8PT3BlbkFJbvpvdj1TRaTKtGYQi4eu"
+
+llm = ChatOpenAI(model="o3-mini", api_key=OPENAI_API_KEY)
+
+agent_executor = create_sql_agent(llm, db=db, agent_type="zero-shot-react-description", verbose=True, extra_tools=tools)
+
+
+@callback(
+    Output('response-div', 'children'),
+    Input('submit-btn', 'n_clicks'),
+    State('user-question', 'value'),
+    prevent_initial_call=True
+)
+def activate_llm(_, question):
+    if len(question) > 0:
+        response = agent_executor.invoke(question)
+        return response['output']
+    else:
+        return no_update
 
 if __name__ == "__main__":
     app.run_server(debug=True)

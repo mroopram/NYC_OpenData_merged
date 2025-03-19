@@ -74,7 +74,7 @@ accordion = dbc.Accordion(
         dbc.AccordionItem(
             [
         dbc.Row([
-            dbc.Col([html.Div('Ask our LLM questions about the Energy Star Guide')], width=8),
+            dbc.Col([html.Div('Ask our LLM questions about the Energy Star Score in your neighborhood')], width=8),
         ]),
         dbc.Row([
             dbc.Col([dcc.Textarea(id='user-question', style={'width':400})], width=8),

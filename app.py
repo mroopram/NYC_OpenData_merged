@@ -218,7 +218,7 @@ db = SQLDatabase(engine=engine)
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_community.utilities.tavily_search import TavilySearchAPIWrapper
 
-TAVILY_API_KEY="your key here"
+TAVILY_API_KEY="your_key_here"
 tavilySearchAPIWrapper = TavilySearchAPIWrapper(tavily_api_key=TAVILY_API_KEY)
 
 tavily_tool = TavilySearchResults(api_wrapper=tavilySearchAPIWrapper, 
@@ -231,7 +231,7 @@ tools = [tavily_tool]
 from langchain_openai import ChatOpenAI
 from langchain_community.agent_toolkits import create_sql_agent
 
-OPENAI_API_KEY="your key here"
+OPENAI_API_KEY="your_key_here"
 
 llm = ChatOpenAI(model="o3-mini", api_key=OPENAI_API_KEY)
 
